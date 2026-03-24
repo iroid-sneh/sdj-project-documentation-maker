@@ -190,6 +190,62 @@ function MiniSection({ section }) {
                     </div>
                 </div>
             );
+        case "template-cover":
+            return (
+                <div
+                    style={{
+                        textAlign: "center",
+                        fontFamily: "Arial, sans-serif",
+                        overflow: "hidden",
+                    }}
+                >
+                    <div style={{ fontSize: "2px", marginTop: "2px" }}>
+                        A report submitted to
+                    </div>
+                    <div
+                        style={{
+                            fontSize: "3px",
+                            fontWeight: "bold",
+                            fontStyle: "italic",
+                            margin: "2px 0",
+                        }}
+                    >
+                        BCA
+                    </div>
+                    <div style={{ fontSize: "2px" }}>
+                        {section.projectTitle || "Project Title"}
+                    </div>
+                    <div
+                        style={{
+                            width: "60%",
+                            height: "6px",
+                            border: "0.3px solid #666",
+                            margin: "2px auto",
+                            fontSize: "1.5px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        Students
+                    </div>
+                </div>
+            );
+        case "template-acknowledgement":
+            return (
+                <div style={{ fontFamily: "Arial, sans-serif", overflow: "hidden" }}>
+                    <div style={{ fontSize: "3.5px", fontWeight: "bold", textAlign: "center", margin: "3px 0 2px", textDecoration: "underline" }}>
+                        Acknowledgement
+                    </div>
+                    <div style={{ fontSize: "2px", lineHeight: 1.3, textAlign: "justify", margin: "1px 2px" }}>
+                        The success and final outcome of this project required a lot of guidance...
+                    </div>
+                    <div style={{ fontSize: "2px", lineHeight: 1.3, textAlign: "justify", margin: "1px 2px" }}>
+                        We would not forget to thank Principal...
+                    </div>
+                </div>
+            );
+
         case "imported-pdf":
             return (
                 <div

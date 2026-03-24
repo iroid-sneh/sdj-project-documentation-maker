@@ -50,7 +50,12 @@ function RenderSection({ section }) {
                         color: "#000",
                     }}
                 >
-                    {section.content}
+                    {section.content.split("\n").map((line, i, arr) => (
+                        <span key={i}>
+                            {line}
+                            {i < arr.length - 1 && <br />}
+                        </span>
+                    ))}
                 </p>
             );
 
@@ -104,12 +109,13 @@ function RenderSection({ section }) {
                 </ol>
             );
 
-        case "table":
+        case "table": {
             if (!section.tableData) return null;
+            const isCompact = section.compact;
             return (
                 <div
                     style={{
-                        margin: "12px 0",
+                        margin: isCompact ? "8px 0" : "12px 0",
                         overflowX: "auto",
                         breakInside: "avoid",
                         pageBreakInside: "avoid",
@@ -120,7 +126,7 @@ function RenderSection({ section }) {
                             width: "100%",
                             borderCollapse: "collapse",
                             fontFamily: "Arial, sans-serif",
-                            fontSize: "11pt",
+                            fontSize: isCompact ? "9pt" : "11pt",
                             color: "#000",
                         }}
                     >
@@ -140,13 +146,17 @@ function RenderSection({ section }) {
                                                 key={ci}
                                                 style={{
                                                     border: "1px solid #000",
-                                                    padding: "6px 10px",
+                                                    padding: isCompact
+                                                        ? "3px 6px"
+                                                        : "6px 10px",
                                                     fontWeight: isBold
                                                         ? "bold"
                                                         : "normal",
                                                     textAlign: "left",
                                                     verticalAlign: "top",
-                                                    lineHeight: 1.5,
+                                                    lineHeight: isCompact
+                                                        ? 1.3
+                                                        : 1.5,
                                                 }}
                                             >
                                                 {cell.text}
@@ -159,6 +169,7 @@ function RenderSection({ section }) {
                     </table>
                 </div>
             );
+        }
 
         case "image": {
             const imgWidth = section.imageWidth || 50;
@@ -204,6 +215,78 @@ function RenderSection({ section }) {
                     />
                 </div>
             );
+
+        case "template-cover": {
+            const s = section;
+            const students = s.students || [];
+            const F = "Arial, sans-serif";
+            return (
+                <div style={{ fontFamily: F, color: "#000", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", height: "100%" }}>
+                    <p style={{ fontSize: "14pt", margin: "40px 0 10px" }}>A report submitted to</p>
+                    <img src={COLLEGE_LOGO} alt="SDJ International College" style={{ height: "90px", objectFit: "contain", margin: "6px 0 10px" }} />
+                    <p style={{ fontSize: "12pt", margin: "6px 0 0" }}>Affiliated To: Veer Narmad South Gujarat University, Surat</p>
+                    <p style={{ fontSize: "12pt", margin: "4px 0 0" }}>For, Partial requirement for the fulfillment of the degree of</p>
+                    <h1 style={{ fontSize: "22pt", fontWeight: "bold", fontStyle: "italic", margin: "30px 0 0" }}>Bachelor of Computer Applications (BCA)</h1>
+                    <div style={{ margin: "36px 0 0" }}>
+                        <p style={{ fontSize: "14pt", margin: 0 }}>BCA Sem VI</p>
+                        <p style={{ fontSize: "14pt", margin: "2px 0 0" }}>A.Y. 2025-26</p>
+                    </div>
+                    <p style={{ fontSize: "14pt", margin: "30px 0 0" }}>
+                        Project Report On <strong>{s.projectTitle || <span style={{ color: "#999" }}>&lt;TYPE PROJECT TITLE HERE&gt;</span>}</strong>
+                    </p>
+                    <p style={{ fontSize: "14pt", margin: "30px 0 10px" }}>by</p>
+                    <table style={{ borderCollapse: "collapse", width: "80%", fontSize: "12pt" }}>
+                        <thead>
+                            <tr>
+                                {["Roll No.", "Seat No.", "Name Of Student"].map((h) => (
+                                    <th key={h} style={{ border: "1px solid #000", padding: "7px 12px", fontWeight: "bold" }}>{h}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {students.map((stu, i) => (
+                                <tr key={i}>
+                                    <td style={{ border: "1px solid #000", padding: "7px 12px", width: "20%" }}>{stu.rollNo || "\u00A0"}</td>
+                                    <td style={{ border: "1px solid #000", padding: "7px 12px", width: "20%" }}>{stu.seatNo || "\u00A0"}</td>
+                                    <td style={{ border: "1px solid #000", padding: "7px 12px" }}>{stu.name || "\u00A0"}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <div style={{ textAlign: "left", width: "80%", marginTop: "auto", paddingBottom: "20px" }}>
+                        <p style={{ fontSize: "12pt", fontWeight: "bold", margin: "0 0 2px" }}>Project Guide by:</p>
+                        <p style={{ fontSize: "12pt", margin: 0 }}>{s.guideName || <span style={{ color: "#999" }}>&lt;Project guide Name&gt;</span>}</p>
+                    </div>
+                </div>
+            );
+        }
+
+        case "template-acknowledgement": {
+            const s = section;
+            const studentLines = s.students || [];
+            const F = "Arial, sans-serif";
+            const P = { fontFamily: F, fontSize: "12pt", lineHeight: 1.8, textAlign: "justify", color: "#000", margin: "0 0 20px" };
+            return (
+                <div style={{ fontFamily: F, color: "#000", height: "100%", display: "flex", flexDirection: "column" }}>
+                    <h1 style={{ fontFamily: F, fontSize: "18pt", fontWeight: "bold", textAlign: "center", margin: "30px 0 24px", textDecoration: "underline", textUnderlineOffset: "4px" }}>Acknowledgement</h1>
+                    <p style={P}>
+                        The success and final outcome of this project required a lot of guidance and assistance from many people and we are extremely fortunate to have got this all along the completion of our project work. Whatever we have done is only due to such guidance and assistance.
+                    </p>
+                    <p style={P}>
+                        We would not forget to thank Principal Dr. Aditi Bhatt, IQAC coordinator and trust representative Dr. Vaibhav Desai, In-charge of PG Courses Dr. Vimal Vaiwala , In-charge of UG-BCA and Head of the BCA Department Prof. Nainesh Gathiyawala and Project guide {s.guideName ? <strong>{s.guideName}</strong> : "_________________ "} and all other Assistant professors of SDJ International College, Vesu, who took keen interest on our project work and guided us all along, till the completion of our project work by providing all the necessary information for developing a good system.
+                    </p>
+                    <p style={P}>
+                        We are extremely grateful to her/him for providing such a nice support and guidance though she/he had busy schedule managing the college dealings.
+                        {" "}We are thankful and fortunate enough to get support and guidance from all Teaching staffs of IT Department which helped us in successfully completing our project work. Also, we would like to extend our sincere regards to all the non-teaching staff of IT Department for their timely support.
+                    </p>
+                    <div style={{ textAlign: "right", marginTop: "auto", paddingBottom: "40px" }}>
+                        {studentLines.map((line, i) => (
+                            <p key={i} style={{ fontFamily: F, fontSize: "12pt", fontWeight: "bold", margin: "2px 0", color: "#000" }}>{line}</p>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
 
         case "imported-pdf":
             return (
@@ -307,12 +390,27 @@ const DocumentPreview = forwardRef(function DocumentPreview({
         }
     }, [activePageId]);
 
-    // Overflow detection: after render, check if any page's content overflows
+    // Clean up refs when pages are removed
+    useEffect(() => {
+        const pageIds = new Set(pages.map((p) => p.id));
+        for (const id of Object.keys(pageRefs.current)) {
+            if (!pageIds.has(Number(id)) && !pageIds.has(id)) {
+                delete pageRefs.current[id];
+                delete contentRefs.current[id];
+                delete bodyRefs.current[id];
+            }
+        }
+    }, [pages]);
+
+    // Overflow detection with 5px tolerance to prevent flicker
     const checkOverflow = useCallback(() => {
         if (!onOverflow) return;
 
         for (const page of pages) {
             if (page.sections.length <= 1) continue;
+            // Skip template pages (noHeaderFooter) — they manage their own layout
+            if (page.noHeaderFooter) continue;
+
             const bodyEl = bodyRefs.current[page.id];
             const contentEl = contentRefs.current[page.id];
             if (!bodyEl || !contentEl) continue;
@@ -320,29 +418,27 @@ const DocumentPreview = forwardRef(function DocumentPreview({
             const bodyHeight = bodyEl.clientHeight;
             const contentHeight = contentEl.scrollHeight;
 
-            if (contentHeight > bodyHeight + 2) {
-                // This page overflows — move last section to next page
+            if (contentHeight > bodyHeight + 5) {
                 onOverflow(page.id);
-                return; // handle one at a time to avoid batching issues
+                return;
             }
         }
     }, [pages, onOverflow]);
 
     useEffect(() => {
-        // Debounce reflow checks to avoid rapid loops
         clearTimeout(reflowTimer.current);
-        reflowTimer.current = setTimeout(checkOverflow, 80);
+        reflowTimer.current = setTimeout(checkOverflow, 150);
         return () => clearTimeout(reflowTimer.current);
     }, [checkOverflow]);
 
-    // Also check after images load
+    // Check after images load (debounced)
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
 
         const onLoad = () => {
             clearTimeout(reflowTimer.current);
-            reflowTimer.current = setTimeout(checkOverflow, 100);
+            reflowTimer.current = setTimeout(checkOverflow, 200);
         };
 
         container.addEventListener("load", onLoad, true);
@@ -360,10 +456,12 @@ const DocumentPreview = forwardRef(function DocumentPreview({
         >
             {pages.map((page, pageIndex) => {
                 const isActive = page.id === activePageId;
-                // Full-page imported PDF: single imported-pdf section = no header/footer
-                const isFullPageImport =
-                    page.sections.length === 1 &&
-                    page.sections[0].type === "imported-pdf";
+                // No header/footer for: template pages, imported PDFs, cover pages
+                const isFullPage =
+                    page.noHeaderFooter ||
+                    (page.sections.length === 1 &&
+                        (page.sections[0].type === "imported-pdf" ||
+                            page.sections[0].type === "template-cover"));
 
                 return (
                     <div
@@ -382,7 +480,7 @@ const DocumentPreview = forwardRef(function DocumentPreview({
                             }`}
                         >
                             Page {pageIndex + 1}
-                            {isFullPageImport && (
+                            {isFullPage && (
                                 <span className="ml-1 opacity-70">
                                     (imported)
                                 </span>
@@ -399,35 +497,67 @@ const DocumentPreview = forwardRef(function DocumentPreview({
                             style={{
                                 width: "210mm",
                                 height: "297mm",
-                                padding: isFullPageImport
-                                    ? "0"
-                                    : "20mm 18mm 15mm 18mm",
+                                padding:
+                                    isFullPage &&
+                                    page.sections.length === 1 &&
+                                    page.sections[0].type === "imported-pdf"
+                                        ? "0"
+                                        : "20mm 18mm 15mm 18mm",
                                 boxSizing: "border-box",
                                 display: "flex",
                                 flexDirection: "column",
                                 overflow: "hidden",
                             }}
                         >
-                            {isFullPageImport ? (
-                                /* Full-page imported PDF — fills entire A4 */
-                                <div
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    <img
-                                        src={page.sections[0].imageData}
-                                        alt={page.sections[0].content}
+                            {isFullPage ? (
+                                /* Full-page: no header/footer */
+                                page.sections.length === 1 &&
+                                page.sections[0].type === "imported-pdf" ? (
+                                    /* Imported PDF — edge to edge */
+                                    <div
                                         style={{
                                             width: "100%",
                                             height: "100%",
-                                            objectFit: "contain",
-                                            display: "block",
+                                            overflow: "hidden",
                                         }}
-                                    />
-                                </div>
+                                    >
+                                        <img
+                                            src={page.sections[0].imageData}
+                                            alt={page.sections[0].content}
+                                            style={{
+                                                width: "100%",
+                                                height: "100%",
+                                                objectFit: "contain",
+                                                display: "block",
+                                            }}
+                                        />
+                                    </div>
+                                ) : (
+                                    /* Template page (cover/ack/index) — with padding, all sections */
+                                    <div
+                                        ref={(el) =>
+                                            (bodyRefs.current[page.id] = el)
+                                        }
+                                        style={{
+                                            flex: 1,
+                                            overflow: "hidden",
+                                        }}
+                                    >
+                                        <div
+                                            ref={(el) =>
+                                                (contentRefs.current[page.id] = el)
+                                            }
+                                            style={{ height: "100%" }}
+                                        >
+                                            {page.sections.map((section) => (
+                                                <RenderSection
+                                                    key={section.id}
+                                                    section={section}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
                             ) : (
                                 <>
                                     {/* Header */}

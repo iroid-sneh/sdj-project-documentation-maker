@@ -17,6 +17,9 @@ import {
   X,
   Pencil,
   Check,
+  FileText,
+  BookOpen,
+  ListOrdered,
 } from 'lucide-react';
 
 const SECTION_TYPES = [
@@ -49,6 +52,8 @@ function getDefaultAlign(type) {
 
 function getSectionLabel(type) {
   if (type === 'imported-pdf') return 'Imported PDF';
+  if (type === 'template-cover') return 'Cover Page';
+  if (type === 'template-acknowledgement') return 'Acknowledgement';
   const found = SECTION_TYPES.find((t) => t.value === type);
   return found ? found.label : type;
 }
@@ -62,6 +67,7 @@ export default function Sidebar({
   onClearAll,
   onSavePdf,
   onImportPdf,
+  onInsertTemplate,
   projectName,
   onProjectNameChange,
   activePageIndex,
@@ -80,15 +86,30 @@ export default function Sidebar({
   const [tableCols, setTableCols] = useState(2);
   const [tableData, setTableData] = useState(() => createEmptyTable(2, 2));
 
+  // Cover page edit state
+  const [coverData, setCoverData] = useState({
+    projectTitle: '',
+    guideName: '',
+    students: [
+      { rollNo: '', seatNo: '', name: '' },
+      { rollNo: '', seatNo: '', name: '' },
+      { rollNo: '', seatNo: '', name: '' },
+      { rollNo: '', seatNo: '', name: '' },
+    ],
+  });
+
   // Edit mode: null means adding new, otherwise holds the section id being edited
   const [editingId, setEditingId] = useState(null);
 
   // Confirm modal state
   const [modal, setModal] = useState({ open: false, type: null, data: null });
 
+  const isEditing = editingId !== null;
   const isFileType = type === 'image' || type === 'pdf-page';
   const isTable = type === 'table';
-  const isEditing = editingId !== null;
+  const isCover = type === 'template-cover';
+  const isAck = type === 'template-acknowledgement';
+  const isTemplateEdit = (isCover || isAck) && isEditing;
 
   function createEmptyTable(rows, cols) {
     return Array.from({ length: rows }, () =>
@@ -146,6 +167,20 @@ export default function Sidebar({
       setTableRows(data.length);
       setTableCols(data[0]?.length || 2);
       setTableData(data);
+    } else if (section.type === 'template-cover') {
+      setCoverData({
+        projectTitle: section.projectTitle || '',
+        guideName: section.guideName || '',
+        students: (section.students || []).map((s) => ({ ...s })),
+      });
+    } else if (section.type === 'template-acknowledgement') {
+      setCoverData({
+        projectTitle: '',
+        guideName: section.guideName || '',
+        students: (section.students || []).map((s) =>
+          typeof s === 'string' ? { rollNo: '', seatNo: '', name: s } : s
+        ),
+      });
     }
   };
 
@@ -238,6 +273,23 @@ export default function Sidebar({
         onAddSection({ id: Date.now(), ...data });
         setTableData(createEmptyTable(tableRows, tableCols));
       }
+    } else if (isCover && isEditing) {
+      onUpdateSection(editingId, {
+        type: 'template-cover',
+        content: 'Cover Page',
+        projectTitle: coverData.projectTitle,
+        guideName: coverData.guideName,
+        students: coverData.students.map((s) => ({ ...s })),
+      });
+      resetForm();
+    } else if (type === 'template-acknowledgement' && isEditing) {
+      onUpdateSection(editingId, {
+        type: 'template-acknowledgement',
+        content: 'Acknowledgement',
+        guideName: coverData.guideName,
+        students: coverData.students.map((s) => s.name || ''),
+      });
+      resetForm();
     } else {
       const trimmed = content.trim();
       if (!trimmed) return;
@@ -288,7 +340,9 @@ export default function Sidebar({
     type !== 'bullet' &&
     type !== 'numbered' &&
     type !== 'pdf-page' &&
-    type !== 'table';
+    type !== 'table' &&
+    type !== 'template-cover' &&
+    type !== 'template-acknowledgement';
 
   return (
     <aside className="no-print w-[350px] min-w-[350px] h-screen bg-gray-50 border-r border-gray-200 flex flex-col">
@@ -322,6 +376,38 @@ export default function Sidebar({
         </p>
       </div>
 
+      {/* College Templates */}
+      {!isEditing && (
+        <div className="px-3 py-2 border-b border-gray-200 bg-white">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            College Templates
+          </p>
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => onInsertTemplate?.('cover')}
+              className="flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 text-xs text-gray-600 hover:text-purple-700 transition-colors cursor-pointer"
+            >
+              <FileText size={16} />
+              Cover Page
+            </button>
+            <button
+              onClick={() => onInsertTemplate?.('acknowledgement')}
+              className="flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 text-xs text-gray-600 hover:text-purple-700 transition-colors cursor-pointer"
+            >
+              <BookOpen size={16} />
+              Ack.
+            </button>
+            <button
+              onClick={() => onInsertTemplate?.('index')}
+              className="flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 text-xs text-gray-600 hover:text-purple-700 transition-colors cursor-pointer"
+            >
+              <ListOrdered size={16} />
+              Index
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Add / Edit Section Form */}
       <div
         className={`p-3 border-b space-y-2.5 overflow-y-auto max-h-[40vh] ${
@@ -345,23 +431,34 @@ export default function Sidebar({
           </div>
         )}
 
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Section Type
-          </label>
-          <select
-            value={type}
-            onChange={(e) => handleTypeChange(e.target.value)}
-            disabled={isEditing && isFileType}
-            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {SECTION_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        {isTemplateEdit ? (
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Section Type
+            </label>
+            <div className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-gray-100 text-gray-600">
+              {getSectionLabel(type)}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Section Type
+            </label>
+            <select
+              value={type}
+              onChange={(e) => handleTypeChange(e.target.value)}
+              disabled={isEditing && (isFileType || isTemplateEdit)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              {SECTION_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {showAlignOptions && (
           <div>
@@ -544,6 +641,77 @@ export default function Sidebar({
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        ) : isTemplateEdit ? (
+          <div className="space-y-2">
+            {isCover && (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Project Title</label>
+                <input
+                  type="text"
+                  value={coverData.projectTitle}
+                  onChange={(e) => setCoverData((p) => ({ ...p, projectTitle: e.target.value }))}
+                  placeholder="e.g. Guest House Management System"
+                  className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            )}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                {isCover ? 'Students' : 'Student Names (bold, right-aligned)'}
+              </label>
+              {coverData.students.map((stu, i) => (
+                <div key={i} className={`flex gap-1 mb-1 ${isCover ? '' : ''}`}>
+                  {isCover && (
+                    <>
+                      <input
+                        type="text"
+                        value={stu.rollNo}
+                        onChange={(e) => {
+                          const s = [...coverData.students];
+                          s[i] = { ...s[i], rollNo: e.target.value };
+                          setCoverData((p) => ({ ...p, students: s }));
+                        }}
+                        placeholder="Roll No"
+                        className="w-[60px] border border-gray-300 rounded px-1.5 py-1 text-xs"
+                      />
+                      <input
+                        type="text"
+                        value={stu.seatNo}
+                        onChange={(e) => {
+                          const s = [...coverData.students];
+                          s[i] = { ...s[i], seatNo: e.target.value };
+                          setCoverData((p) => ({ ...p, students: s }));
+                        }}
+                        placeholder="Seat No"
+                        className="w-[60px] border border-gray-300 rounded px-1.5 py-1 text-xs"
+                      />
+                    </>
+                  )}
+                  <input
+                    type="text"
+                    value={stu.name}
+                    onChange={(e) => {
+                      const s = [...coverData.students];
+                      s[i] = { ...s[i], name: e.target.value };
+                      setCoverData((p) => ({ ...p, students: s }));
+                    }}
+                    placeholder={isAck ? `Student Name (Seat No)` : 'Student Name'}
+                    className="flex-1 border border-gray-300 rounded px-1.5 py-1 text-xs"
+                  />
+                </div>
+              ))}
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Project Guide Name</label>
+              <input
+                type="text"
+                value={coverData.guideName}
+                onChange={(e) => setCoverData((p) => ({ ...p, guideName: e.target.value }))}
+                placeholder="e.g. Prof. Bhumika Patel"
+                className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
         ) : (
