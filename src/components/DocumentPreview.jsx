@@ -205,6 +205,26 @@ function RenderSection({ section }) {
                 </div>
             );
 
+        case "imported-pdf":
+            return (
+                <div
+                    style={{
+                        margin: "0",
+                        textAlign: "center",
+                    }}
+                >
+                    <img
+                        src={section.imageData}
+                        alt={section.content}
+                        style={{
+                            width: "100%",
+                            height: "auto",
+                            display: "block",
+                        }}
+                    />
+                </div>
+            );
+
         default:
             return null;
     }
@@ -340,6 +360,11 @@ const DocumentPreview = forwardRef(function DocumentPreview({
         >
             {pages.map((page, pageIndex) => {
                 const isActive = page.id === activePageId;
+                // Full-page imported PDF: single imported-pdf section = no header/footer
+                const isFullPageImport =
+                    page.sections.length === 1 &&
+                    page.sections[0].type === "imported-pdf";
+
                 return (
                     <div
                         key={page.id}
@@ -357,6 +382,11 @@ const DocumentPreview = forwardRef(function DocumentPreview({
                             }`}
                         >
                             Page {pageIndex + 1}
+                            {isFullPageImport && (
+                                <span className="ml-1 opacity-70">
+                                    (imported)
+                                </span>
+                            )}
                         </div>
 
                         {/* A4 page */}
@@ -369,60 +399,94 @@ const DocumentPreview = forwardRef(function DocumentPreview({
                             style={{
                                 width: "210mm",
                                 height: "297mm",
-                                padding: "20mm 18mm 15mm 18mm",
+                                padding: isFullPageImport
+                                    ? "0"
+                                    : "20mm 18mm 15mm 18mm",
                                 boxSizing: "border-box",
                                 display: "flex",
                                 flexDirection: "column",
                                 overflow: "hidden",
                             }}
                         >
-                            {/* Header */}
-                            <PageHeader projectName={projectName} />
-
-                            {/* Body — fixed available area, overflow hidden */}
-                            <div
-                                ref={(el) =>
-                                    (bodyRefs.current[page.id] = el)
-                                }
-                                style={{
-                                    flex: 1,
-                                    overflow: "hidden",
-                                    position: "relative",
-                                }}
-                            >
+                            {isFullPageImport ? (
+                                /* Full-page imported PDF — fills entire A4 */
                                 <div
-                                    ref={(el) =>
-                                        (contentRefs.current[page.id] = el)
-                                    }
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        overflow: "hidden",
+                                    }}
                                 >
-                                    {page.sections.length === 0 ? (
-                                        <p
-                                            style={{
-                                                fontFamily:
-                                                    "Arial, sans-serif",
-                                                fontSize: "11pt",
-                                                color: "#bbb",
-                                                textAlign: "center",
-                                                marginTop: "80px",
-                                            }}
-                                        >
-                                            {isActive
-                                                ? "Start adding sections from the sidebar"
-                                                : "Empty page — click to select"}
-                                        </p>
-                                    ) : (
-                                        page.sections.map((section) => (
-                                            <RenderSection
-                                                key={section.id}
-                                                section={section}
-                                            />
-                                        ))
-                                    )}
+                                    <img
+                                        src={page.sections[0].imageData}
+                                        alt={page.sections[0].content}
+                                        style={{
+                                            width: "100%",
+                                            height: "100%",
+                                            objectFit: "contain",
+                                            display: "block",
+                                        }}
+                                    />
                                 </div>
-                            </div>
+                            ) : (
+                                <>
+                                    {/* Header */}
+                                    <PageHeader
+                                        projectName={projectName}
+                                    />
 
-                            {/* Footer */}
-                            <PageFooter pageNumber={pageIndex + 1} />
+                                    {/* Body */}
+                                    <div
+                                        ref={(el) =>
+                                            (bodyRefs.current[page.id] = el)
+                                        }
+                                        style={{
+                                            flex: 1,
+                                            overflow: "hidden",
+                                            position: "relative",
+                                        }}
+                                    >
+                                        <div
+                                            ref={(el) =>
+                                                (contentRefs.current[
+                                                    page.id
+                                                ] = el)
+                                            }
+                                        >
+                                            {page.sections.length === 0 ? (
+                                                <p
+                                                    style={{
+                                                        fontFamily:
+                                                            "Arial, sans-serif",
+                                                        fontSize: "11pt",
+                                                        color: "#bbb",
+                                                        textAlign: "center",
+                                                        marginTop: "80px",
+                                                    }}
+                                                >
+                                                    {isActive
+                                                        ? "Start adding sections from the sidebar"
+                                                        : "Empty page — click to select"}
+                                                </p>
+                                            ) : (
+                                                page.sections.map(
+                                                    (section) => (
+                                                        <RenderSection
+                                                            key={section.id}
+                                                            section={section}
+                                                        />
+                                                    )
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <PageFooter
+                                        pageNumber={pageIndex + 1}
+                                    />
+                                </>
+                            )}
                         </div>
                     </div>
                 );

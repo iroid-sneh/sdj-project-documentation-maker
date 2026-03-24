@@ -190,6 +190,26 @@ function MiniSection({ section }) {
                     </div>
                 </div>
             );
+        case "imported-pdf":
+            return (
+                <div
+                    style={{
+                        margin: "0",
+                        textAlign: "center",
+                        overflow: "hidden",
+                    }}
+                >
+                    <img
+                        src={section.imageData}
+                        alt=""
+                        style={{
+                            width: "100%",
+                            height: "auto",
+                            display: "block",
+                        }}
+                    />
+                </div>
+            );
         default:
             return null;
     }

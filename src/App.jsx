@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import PageNavigator from './components/PageNavigator';
 import DocumentPreview from './components/DocumentPreview';
 import { exportPdf } from './utils/exportPdf';
+import { extractPdfPages } from './utils/importPdf';
 
 const STORAGE_KEY = 'documentPages';
 const PROJECT_NAME_KEY = 'documentProjectName';
@@ -195,6 +196,30 @@ export default function App() {
     await exportPdf(container, projectName);
   }, [projectName]);
 
+  // Import PDF: each page of the uploaded PDF becomes a new document page
+  const importPdf = useCallback(async (file) => {
+    const pdfPages = await extractPdfPages(file);
+
+    setPages((prev) => {
+      const idx = prev.findIndex((p) => p.id === activePageId);
+      const newPages = pdfPages.map((pg, i) => ({
+        id: Date.now() + i + Math.random(),
+        sections: [
+          {
+            id: Date.now() + i * 1000 + Math.random(),
+            type: 'imported-pdf',
+            content: `${file.name} — Page ${pg.pageNumber}`,
+            imageData: pg.imageData,
+            align: 'center',
+          },
+        ],
+      }));
+      const copy = [...prev];
+      copy.splice(idx + 1, 0, ...newPages);
+      return copy;
+    });
+  }, [activePageId]);
+
   const clearAll = () => {
     const fresh = createPage();
     setPages([fresh]);
@@ -212,6 +237,7 @@ export default function App() {
         onUpdateSection={updateSection}
         onClearAll={clearAll}
         onSavePdf={savePdf}
+        onImportPdf={importPdf}
         projectName={projectName}
         onProjectNameChange={setProjectName}
         activePageIndex={activePageIndex}

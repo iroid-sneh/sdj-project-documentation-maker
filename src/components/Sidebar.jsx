@@ -48,6 +48,7 @@ function getDefaultAlign(type) {
 }
 
 function getSectionLabel(type) {
+  if (type === 'imported-pdf') return 'Imported PDF';
   const found = SECTION_TYPES.find((t) => t.value === type);
   return found ? found.label : type;
 }
@@ -60,6 +61,7 @@ export default function Sidebar({
   onUpdateSection,
   onClearAll,
   onSavePdf,
+  onImportPdf,
   projectName,
   onProjectNameChange,
   activePageIndex,
@@ -256,6 +258,9 @@ export default function Sidebar({
 
   const [saving, setSaving] = useState(false);
 
+  const [importing, setImporting] = useState(false);
+  const pdfImportRef = useRef(null);
+
   const handlePrint = async () => {
     if (onSavePdf) {
       setSaving(true);
@@ -264,6 +269,18 @@ export default function Sidebar({
       } finally {
         setSaving(false);
       }
+    }
+  };
+
+  const handleImportPdf = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !onImportPdf) return;
+    setImporting(true);
+    try {
+      await onImportPdf(file);
+    } finally {
+      setImporting(false);
+      if (pdfImportRef.current) pdfImportRef.current.value = '';
     }
   };
 
@@ -668,6 +685,21 @@ export default function Sidebar({
           <Printer size={16} />
           {saving ? 'Generating PDF...' : 'Save PDF'}
         </button>
+        <button
+          onClick={() => pdfImportRef.current?.click()}
+          disabled={importing}
+          className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-purple-700 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <FileUp size={16} />
+          {importing ? 'Importing...' : 'Import PDF Pages'}
+        </button>
+        <input
+          ref={pdfImportRef}
+          type="file"
+          accept=".pdf"
+          onChange={handleImportPdf}
+          className="hidden"
+        />
         <button
           onClick={() =>
             setModal({ open: true, type: 'clear-all', data: null })
