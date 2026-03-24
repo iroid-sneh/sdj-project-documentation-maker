@@ -8,14 +8,15 @@ This tool lets you build your college project documentation page by page, with a
 
 ## College Formatting Rules (Applied Automatically)
 
-| Element         | Font   | Size   | Style       |
-|-----------------|--------|--------|-------------|
-| Heading (H1)    | Arial  | 16pt   | Bold        |
-| Sub Heading (H2)| Arial  | 12pt   | Bold        |
-| Content / Body  | Arial  | 11pt   | Normal      |
-| Content Width   | —      | —      | Justify     |
+| Element          | Font  | Size | Style   |
+| ---------------- | ----- | ---- | ------- |
+| Heading (H1)     | Arial | 16pt | Bold    |
+| Sub Heading (H2) | Arial | 12pt | Bold    |
+| Content / Body   | Arial | 11pt | Normal  |
+| Content Width    | —     | —    | Justify |
 
 Every page includes:
+
 - **Header**: College logo (left) + Project name (right)
 - **Footer**: Page number (centered)
 - **Page size**: A4 (210mm x 297mm) — fixed, never stretches
@@ -23,6 +24,7 @@ Every page includes:
 ## Features
 
 ### Content Blocks
+
 - **Heading** — Centered bold title (Arial 16pt)
 - **Sub Heading** — Left-aligned bold subtitle (Arial 12pt)
 - **Paragraph** — Justified body text (Arial 11pt, 1.6 line height)
@@ -33,23 +35,27 @@ Every page includes:
 - **PDF Page Import** — Upload existing PDF pages directly into your document (great for college-provided cover pages, certificates, etc.)
 
 ### Page Management (Canva-style)
+
 - Add, delete, duplicate, and reorder pages
 - Thumbnail navigator panel with mini page previews
 - Click any page to select and edit it
 - Auto-reflow: content that overflows a page automatically moves to the next page
 
 ### Editing
+
 - Edit any existing section — click the pencil icon, modify in the form, hit Save
 - Move sections up/down within a page
 - Alignment controls: Left, Center, Right, Justify
 - Table cells have individual bold toggle buttons
 
 ### Export
+
 - **Save PDF** — Generates a proper multi-page PDF using html2canvas + jsPDF
 - All pages captured at 2x resolution for sharp output
 - File named after your project automatically
 
 ### Data Persistence
+
 - All pages, sections, and project name saved to localStorage automatically
 - Your work persists across browser sessions
 
@@ -108,4 +114,4 @@ Feel free to contact me for any bugs, issues, or feature requests for this docum
 
 ---
 
-Built for SDJ International College, Vesu — Department of Computer Science & Engineering
+Built for SDJ International College, Vesu
