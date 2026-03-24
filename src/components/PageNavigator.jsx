@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import ConfirmModal from "./ConfirmModal";
 
-const COLLEGE_LOGO = "/CollegeLogo.png";
+import COLLEGE_LOGO from "../assets/CollegeLogo.png";
 
 function MiniSection({ section }) {
     switch (section.type) {

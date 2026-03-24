@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback, forwardRef } from "react";
-
-const COLLEGE_LOGO = "/CollegeLogo.png";
+import COLLEGE_LOGO from "../assets/CollegeLogo.png";
 
 function RenderSection({ section }) {
     const align = section.align || "justify";
